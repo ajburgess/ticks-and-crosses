@@ -1,4 +1,7 @@
 const learnerController = function($scope, $http, $routeParams, $localStorage, $sessionStorage, $interval, $window) {
+
+  let nameHasChanged = false;
+
   function uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
       var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -37,6 +40,7 @@ const learnerController = function($scope, $http, $routeParams, $localStorage, $
   }
 
   function submitName() {
+    nameHasChanged = false;
     const url = "/api/status";
     const data = {
       client: getClient(),
@@ -64,14 +68,9 @@ const learnerController = function($scope, $http, $routeParams, $localStorage, $
   }
 
   $scope.nameChanged = function() {
+    nameHasChanged = true;
     setTitle();
-    getStorage().name = $scope.learner.name;
-    $scope.failed = false;
-    submitName().then(function(response) {
-      // Nothing to do
-    }, function (error) {
-      $scope.failed = true;
-    });
+    getStorage().name = $scope.learner.name;    
   }
 
   function updateTimeMessage() {
@@ -118,7 +117,17 @@ const learnerController = function($scope, $http, $routeParams, $localStorage, $
 
   setTitle();
 
-  const timer = $interval(updateTimeMessage, 1000);
+  const timer = $interval(function () {
+    updateTimeMessage();
+    if (nameHasChanged) {
+      $scope.failed = false;
+      submitName().then(function(response) {
+        // Nothing to do
+      }, function (error) {
+        $scope.failed = true;
+      });
+    }
+  }, 1000);
 
   $scope.$on('$destroy', function() {
     if (timer) {
