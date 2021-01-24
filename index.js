@@ -37,6 +37,20 @@ app.post('/api/status/clear', async (req, res, next) => {
   }
 });
 
+app.post('/api/status/reset', async (req, res, next) => {
+  try {
+    const roomCode = req.body.room;
+    const room = getRoom(roomCode);
+    for (const client in room.learners) {
+      delete room.learners[client];
+    }
+    saveRoom(room);
+    getStatus(roomCode, res);
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.post('/api/status', async (req, res, next) => {
   try {
     const { client, name, status } = req.body;

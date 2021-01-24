@@ -48,7 +48,7 @@ button.button3 {
   min-width: 380px;
 }
 
-.tutor .panel {
+.tutor .panel, .settings .panel {
   background-color: white;  
   min-width: 100px;
 }

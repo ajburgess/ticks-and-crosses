@@ -54,6 +54,22 @@ const tutorController = function($scope, $http, $routeParams, $interval, $locati
     });
   }
 
+  $scope.resetRoom = function () {
+    // Reset room in browser first
+    $scope.room.learners = [];
+
+    // Then do it in the server too
+    const url = `/api/status/reset`;
+    const data = { room: $routeParams.room };
+    $http.post(url, data).then(function (response) {
+      $scope.room = response.data;
+      $scope.failedToClear = false;
+    }, function (error) {
+      console.log(error);
+      $scope.failedToClear = true;
+    });
+  }
+
   $scope.refresh = refresh;
 
   $window.document.title = "Tutor - " + $scope.room.room;
