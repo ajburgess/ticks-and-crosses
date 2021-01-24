@@ -1,4 +1,4 @@
-const tutorController = function($scope, $http, $routeParams, $interval, $location) {
+const tutorController = function($scope, $http, $routeParams, $interval, $location, $window) {
   function refresh() {
     console.log('refresh...');
     const code = $routeParams.room;
@@ -10,12 +10,12 @@ const tutorController = function($scope, $http, $routeParams, $interval, $locati
   }
 
   $scope.room = {
-    room: $routeParams.room,
+    room: $routeParams.room.toUpperCase(),
     learners: [],
     beep: true // Kick off ability to play hand-up beep
   };
 
-  $scope.url = new URL('/' + $routeParams.room, $location.absUrl()).href;
+  $scope.url = new URL('/' + $scope.room.room, $location.absUrl()).href;
 
   $scope.copyUrl = function () {
     const tempInput = document.createElement("input");
@@ -35,6 +35,10 @@ const tutorController = function($scope, $http, $routeParams, $interval, $locati
     });
   }
 
+  $scope.refresh = refresh;
+
+  $window.document.title = "Tutor - " + $scope.room.room;
+
   let timer = $interval(refresh, 1000);
 
   $scope.$on('$destroy', function() {
@@ -43,10 +47,6 @@ const tutorController = function($scope, $http, $routeParams, $interval, $locati
       timer = undefined;
     }
   });
-
-  $scope.refresh = refresh;
-
-  //refresh();
 };
 
 app.controller('tutor-controller', tutorController);

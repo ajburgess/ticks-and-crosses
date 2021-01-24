@@ -1,4 +1,4 @@
-const learnerController = function($scope, $http, $routeParams, $localStorage, $sessionStorage, $interval) {
+const learnerController = function($scope, $http, $routeParams, $localStorage, $sessionStorage, $interval, $window) {
   function uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
       var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -59,7 +59,12 @@ const learnerController = function($scope, $http, $routeParams, $localStorage, $
     });
   }
 
+  function setTitle() {
+    $window.document.title = ($scope.learner.name || "Learner")  + " - " + $scope.room.code;
+  }
+
   $scope.nameChanged = function() {
+    setTitle();
     getStorage().name = $scope.learner.name;
     $scope.failed = false;
     submitName().then(function(response) {
@@ -68,24 +73,6 @@ const learnerController = function($scope, $http, $routeParams, $localStorage, $
       $scope.failed = true;
     });
   }
-
-  $scope.room = {
-    code: $routeParams.room.toUpperCase()
-  };
-
-  $scope.learner = {
-    name: getStorage().name || "",
-    status: ""
-  };
-
-  // In event of F5 refresh, or re-opening this page
-  // re-synchronise with the server's view...
-  getStatus().then(function (response) {
-    $scope.room.code = response.data.room;
-    $scope.learner.name = response.data.name || $scope.learner.name || "";
-    $scope.learner.status = response.data.status || "";
-    submitName();
-  });
 
   function updateTimeMessage() {
     let whenSubmitted = getStorage().whenSubmitted;
@@ -109,6 +96,27 @@ const learnerController = function($scope, $http, $routeParams, $localStorage, $
       $scope.timeMessage = "More than an hour ago";
     }
   }
+
+  $scope.room = {
+    code: $routeParams.room.toUpperCase()
+  };
+
+  $scope.learner = {
+    name: getStorage().name || "",
+    status: ""
+  };
+
+  // In event of F5 refresh, or re-opening this page
+  // re-synchronise with the server's view...
+  getStatus().then(function (response) {
+    $scope.room.code = response.data.room;
+    $scope.learner.name = response.data.name || $scope.learner.name || "";
+    $scope.learner.status = response.data.status || "";
+    submitName();
+    setTitle();
+  });
+
+  setTitle();
 
   const timer = $interval(updateTimeMessage, 1000);
 

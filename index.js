@@ -23,17 +23,15 @@ function saveRoom(room) {
 
 app.post('/api/status/clear', async (req, res, next) => {
   try {
-    const room = getRoom(req.body.room);
+    const roomCode = req.body.room;
+    const room = getRoom(roomCode);
     for (const client in room.learners) {
       const learner = room.learners[client];
       learner.status = "";
       learner.handUpRank = undefined;
     }
     saveRoom(room);
-    res.json({
-      room: room.code,
-      learners: Object.values(room.learners)
-    });
+    getStatus(roomCode, res);
   } catch (error) {
     next(error);
   }
@@ -100,9 +98,8 @@ function compareLearners(a, b) {
   }
 }
 
-app.get('/api/status/:room', async (req, res, next) => {
-  try {
-    const room = getRoom(req.params.room);
+function getStatus(roomCode, res) {
+    const room = getRoom(roomCode);
     const beep = room.beep;
     delete room.beep;
     tidyRoom(room);
@@ -111,6 +108,12 @@ app.get('/api/status/:room', async (req, res, next) => {
       beep: beep,
       learners: Object.values(room.learners).filter(l => l.name).sort(compareLearners)
     });
+}
+
+app.get('/api/status/:room', async (req, res, next) => {
+  try {
+    const roomCode = req.params.room;
+    getStatus(roomCode, res);
   } catch (error) {
     next(error);
   }
