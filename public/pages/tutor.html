@@ -1,0 +1,41 @@
+<div class="main">
+  <div class="panel">
+    <div class="section">
+      <div class="row">
+        <h1>Room {{room.room}}</h1>
+      </div>
+      <div class="row2 url">
+        <span class="url">{{url}}</span>
+        <button ng-click="copyUrl()" title="Copy to clipboard" style="width: fit-content">
+          <i class="fas fa-clipboard"></i>
+        </button>
+      </div>
+    </div>
+    <div class="section" ng-if="room.learners.length > 0">
+      <div class="row2">
+        <table>
+          <tr ng-repeat="learner in room.learners" ng-class="learner.isActive ? 'active' : 'inactive'">
+            <td>
+              <span>{{learner.name}}</span>
+            </td>
+            <td class="status">
+              <span ng-if="learner.handUpRank > 0">{{learner.handUpRank}}</span>
+              <status-symbol status="learner.status" />
+            </td>
+           </tr>
+        </table>
+      </div>
+    </div>
+    <div class="section" ng-if="room.learners.length == 0">
+      <div class="row">No learners have joined the room yet.</div>
+      <div class="row">Send them the URL above.</div>
+    </div>
+    <div class="section" ng-if="room.learners.length > 0">
+      <div class="row">
+        <button ng-click="clearStatus()">Clear status</button>
+      </div>
+    </div>
+  </div>
+</div>
+<audio ng-if="room.beep" autoplay src="/sounds/beep.wav">
+</audio>

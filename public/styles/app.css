@@ -1,0 +1,133 @@
+body {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+h1 {
+  margin: 0;
+}
+
+button {
+  cursor: pointer;
+}
+
+button {
+  padding: 5px;
+  font-size: large;
+  white-space: nowrap;
+}
+
+.learner input[type=text] {
+  padding: 5px;
+}
+
+.invisible {
+  visibility: hidden;
+}
+
+.panel {
+  padding: 20px;
+  border: 1px solid black;
+  background-color: ghostwhite;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  row-gap: 25px;
+  min-height: 15em;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  row-gap: 10px;
+}
+
+.main {
+  display: flex;
+  justify-content: center;
+}
+
+.row {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  column-gap: 10px;
+}
+
+.row2 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  column-gap: 10px;
+}
+
+div.status {
+  font-size: 3rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 3.6rem;
+}
+
+td.status {
+  text-align: right;
+}
+
+.row button {
+  flex: 1 1 0;
+}
+
+input[type=text] {
+  width: 100%;
+  text-align: center;
+  font-size: large;
+}
+
+.intro input[type=text] {
+  font-size: x-large;
+}
+
+.tick {
+  color: green;
+}
+
+.cross {
+  color: darkred;
+}
+
+.smiley {
+  color: orange;
+}
+
+.coffee {
+  color: burlywood;
+}
+
+.away {
+  color: lightskyblue;
+}
+
+.failed {
+  color: darkred;
+}
+
+.time-message {
+  color: darkgray;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+td {
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  border-top: 1px solid lightslategray;
+  border-bottom: 1px solid lightslategray;
+}
+
+.inactive {
+  opacity: 50%;
+}

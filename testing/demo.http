@@ -1,0 +1,25 @@
+GET http://127.0.0.1:8000/api/status/abcd
+
+###
+
+POST http://127.0.0.1:8000/api/status
+content-type: application/json
+
+{
+  "client": "1111-1111",
+  "room": "ABCD",
+  "name": "Fred",
+  "status": "tick"
+}
+
+###
+
+POST http://127.0.0.1:8000/api/status
+content-type: application/json
+
+{
+  "client": "2222-2222",
+  "room": "ABCD",
+  "name": "Sam",
+  "status": "tick"
+}

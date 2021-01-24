@@ -1,0 +1,59 @@
+<div class="main">
+  <div class="panel learner">
+    <div class="section">
+      <div class="row">
+        <h1>Room {{room.code}}</h1>
+      </div>
+      <div class="row">
+        <input type="text" ng-model="learner.name" placeholder="First name only" autocomplete="off" ng-change="nameChanged()">
+      </div>
+    </div>
+    <div class="section" ng-class="{invisible: !learner.name}">
+      <div class="row">
+        <div class="status">
+          <status-symbol status="learner.status" />
+        </div>
+      </div>
+      <div class="row">
+        <div ng-if="failed" class="failed">
+          Status update failed - try again
+        </div>
+        <div ng-if="!failed" class="time-message">
+          {{(learner.status ? timeMessage : '') || '&nbsp;'}}
+        </div>
+      </div>
+    </div>
+    <div class="section" ng-class="{invisible: !learner.name}">
+      <div class="row">
+        <button ng-click="send('tick')">
+          <status-symbol status="'tick'"></status-symbol><span>Tick</span>
+        </button>
+        <button ng-click="send('cross')">
+          <status-symbol status="'cross'"></status-symbol><span>Cross</span>
+        </button>
+        <button ng-click="send('hand-up')">
+          <status-symbol status="'hand-up'"></status-symbol><span>Hand</span>
+        </button>
+      </div>
+      <div class="row">
+        <button ng-click="send('A')">A</button>
+        <button ng-click="send('B')">B</button>
+        <button ng-click="send('C')">C</button>
+        <button ng-click="send('D')">D</button>
+      </div>
+      <div class="row">
+        <button ng-click="send('smiley')">
+          <status-symbol status="'smiley'"></status-symbol><span>Smiley</span>
+        </button>
+        <button ng-click="send('coffee')">
+          <status-symbol status="'coffee'"></status-symbol><span>Break</span>
+        </button>
+        <button ng-click="send('away')">
+          <status-symbol status="'away'"></status-symbol><span>Away</span>
+        </button>
+      </div>
+      <div class="row">
+        <button ng-click="send('')">Clear</button>
+      </div>
+    </div>
+  </div>
