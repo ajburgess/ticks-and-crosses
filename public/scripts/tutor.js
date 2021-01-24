@@ -1,11 +1,19 @@
 const tutorController = function($scope, $http, $routeParams, $interval, $location, $window) {
   function refresh() {
-    console.log('refresh...');
     const code = $routeParams.room;
     const url = `/api/status/${code}`;
     $http({url: url, method: 'GET'})
     .then(function (response) {
       $scope.room = response.data;
+      $scope.failedToRefresh = false;
+    }, function (error) {
+      console.log(error);
+      $scope.failedToRefresh = true;
+      $scope.room.learners.forEach(learner => {
+        learner.isActive = false;
+        learner.status = "";
+        learner.handUpRank = undefined;
+      });
     });
   }
 
@@ -28,10 +36,21 @@ const tutorController = function($scope, $http, $routeParams, $interval, $locati
   }
 
   $scope.clearStatus = function () {
+    // Clear status in browser first
+    $scope.room.learners.forEach(learner => {
+      learner.status = "";
+      learner.handUpRank = undefined;
+    });
+
+    // Then do it in the server too
     const url = `/api/status/clear`;
     const data = { room: $routeParams.room };
     $http.post(url, data).then(function (response) {
       $scope.room = response.data;
+      $scope.failedToClear = false;
+    }, function (error) {
+      console.log(error);
+      $scope.failedToClear = true;
     });
   }
 

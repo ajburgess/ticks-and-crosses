@@ -35,6 +35,10 @@
         <button ng-click="clearStatus()">Clear status</button>
       </div>
     </div>
+    <div class="row">
+      <div class="failed" ng-if="failedToClear">Failed to clear - try again</div>
+      <div class="failed" ng-if="!failedToClear && failedToRefresh">Failed to refresh</div>
+    </div>
   </div>
 </div>
 <audio ng-if="room.beep" autoplay src="/sounds/beep.wav">
