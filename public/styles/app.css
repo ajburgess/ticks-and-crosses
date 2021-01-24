@@ -53,6 +53,10 @@ button {
   column-gap: 10px;
 }
 
+.left {
+  justify-content: flex-start;
+}
+
 .row2 {
   display: flex;
   justify-content: center;
