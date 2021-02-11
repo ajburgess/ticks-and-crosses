@@ -83,6 +83,14 @@ button.button3 {
   column-gap: 10px;
 }
 
+.row3 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  column-gap: 10px;
+  text-align: center;
+}
+
 div.status {
   font-size: 3rem;
   display: flex;
