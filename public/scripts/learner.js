@@ -1,4 +1,4 @@
-const learnerController = function($scope, $http, $routeParams, $localStorage, $sessionStorage, $interval, $window) {
+const learnerController = function($scope, $http, $routeParams, $localStorage, $sessionStorage, $timeout, $window) {
 
   let nameHasChanged = false;
 
@@ -21,79 +21,44 @@ const learnerController = function($scope, $http, $routeParams, $localStorage, $
     return storage.client;
   }
 
-  function getStatus() {
-    const room = $routeParams.room;
-    const client = getClient();
-    const url = `/api/status/${room}/${client}`;
-    return $http.get(url);
-  }
-
   function submitStatus() {
-    const url = "/api/status";
     const data = {
       client: getClient(),
       room: $routeParams.room,
       status: $scope.learner.status,
       name: $scope.learner.name
     };
-    return $http.post(url, data);
+    socket.emit('status', data); // SOCKETS
   }
 
   function submitName() {
     nameHasChanged = false;
-    const url = "/api/status";
     const data = {
       client: getClient(),
       room: $routeParams.room,
       name: $scope.learner.name
     };
-    return $http.post(url, data);
+    socket.emit('status', data); // SOCKETS
   }
 
   $scope.send = function(status) {
     $scope.learner.status = status;
-    getStorage().whenSubmitted = new Date();
-    updateTimeMessage();
-    $scope.failed = false;
-    submitStatus().then(function(response) {
-      // Nothing to do!
-    }, function (error) {
-      // Pause slightly before displaying failed message, to avoid flashing
-      $interval(function () { $scope.failed = true }, 250, 1);
-    });
+    submitStatus();
   }
 
   function setTitle() {
     $window.document.title = ($scope.learner.name || "Learner")  + " - " + $scope.room.code;
   }
 
-  $scope.nameChanged = function() {
-    nameHasChanged = true;
-    setTitle();
-    getStorage().name = $scope.learner.name;    
-  }
+  let delay = undefined;
 
-  function updateTimeMessage() {
-    let whenSubmitted = getStorage().whenSubmitted;
-    if (!whenSubmitted) {
-      timeMessage = "";
-      return;
+  $scope.nameChanged = function() {
+    setTitle();
+    getStorage().name = $scope.learner.name;
+    if (delay) {
+      $timeout.cancel(delay);
     }
-    if (typeof whenSubmitted == 'string') {
-      whenSubmitted = new Date(whenSubmitted);
-    }
-    const secondsAgo = (new Date() - whenSubmitted) / 1000;
-    if (secondsAgo < 5) {
-      $scope.timeMessage = "Just now"
-    } else if (secondsAgo >= 5 && secondsAgo < 60) {
-      const nearest5Seconods = Math.trunc(secondsAgo / 5) * 5;
-      $scope.timeMessage = `${nearest5Seconods} seconds ago`;
-    } else if (secondsAgo >= 60 && secondsAgo < 60 * 60) {
-      const nearestMinute = Math.trunc(secondsAgo / 60);
-      $scope.timeMessage = `${nearestMinute} ${nearestMinute == 1 ? 'minute' : 'minutes'} ago`;
-    } else {
-      $scope.timeMessage = "More than an hour ago";
-    }
+    delay = $timeout(submitName, 250);
   }
 
   $scope.room = {
@@ -105,36 +70,37 @@ const learnerController = function($scope, $http, $routeParams, $localStorage, $
     status: ""
   };
 
-  // In event of F5 refresh, or re-opening this page
-  // re-synchronise with the server's view...
-  getStatus().then(function (response) {
-    $scope.room.code = response.data.room;
-    $scope.learner.name = response.data.name || $scope.learner.name || "";
-    $scope.learner.status = response.data.status || "";
-    submitName();
-    setTitle();
+  socket.on('clear', function() {
+    $scope.$applyAsync(function() {
+      $scope.learner.status = '';
+    });
   });
 
-  setTitle();
-
-  const timer = $interval(function () {
-    updateTimeMessage();
-    if (nameHasChanged) {
-      $scope.failed = false;
-      submitName().then(function(response) {
-        // Nothing to do
-      }, function (error) {
-        $scope.failed = true;
-      });
-    }
-  }, 1000);
+  socket.on('refresh-learner', (data) => {
+    $scope.$applyAsync(function() {
+      $scope.room.code = data.room;
+      $scope.learner.name = data.name || $scope.learner.name || "";
+      $scope.learner.status = data.status || "";
+      submitName();
+      setTitle();
+    });
+  });
 
   $scope.$on('$destroy', function() {
-    if (timer) {
-      $interval.cancel(timer);
-      timer = undefined;
+    socket.off('refresh-learner');
+    socket.off('clear');
+    if (delay) {
+      $timeout.cancel(delay);
+      delay = undefined;
     }
   });
+
+  // In event of F5 refresh, or re-opening this page
+  // re-synchronise with the server's view...
+  const roomCode = $routeParams.room;
+  const client = getClient();
+  socket.emit('join-as-learner', roomCode, client);
+  setTitle();  
 };
 
 app.controller('learner-controller', learnerController);

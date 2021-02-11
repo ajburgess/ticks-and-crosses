@@ -1,22 +1,4 @@
 const tutorController = function($scope, $http, $routeParams, $interval, $location, $window) {
-  function refresh() {
-    const code = $routeParams.room;
-    const url = `/api/status/${code}`;
-    $http({url: url, method: 'GET'})
-    .then(function (response) {
-      $scope.room = response.data;
-      $scope.failedToRefresh = false;
-    }, function (error) {
-      console.log(error);
-      $scope.failedToRefresh = true;
-      $scope.room.learners.forEach(learner => {
-        learner.isActive = false;
-        learner.status = "";
-        learner.handUpRank = undefined;
-      });
-    });
-  }
-
   $scope.room = {
     room: $routeParams.room.toUpperCase(),
     learners: [],
@@ -43,15 +25,8 @@ const tutorController = function($scope, $http, $routeParams, $interval, $locati
     });
 
     // Then do it in the server too
-    const url = `/api/status/clear`;
-    const data = { room: $routeParams.room };
-    $http.post(url, data).then(function (response) {
-      $scope.room = response.data;
-      $scope.failedToClear = false;
-    }, function (error) {
-      console.log(error);
-      $scope.failedToClear = true;
-    });
+    const roomCode = $routeParams.room;
+    socket.emit('clear', roomCode);
   }
 
   $scope.resetRoom = function () {
@@ -59,28 +34,23 @@ const tutorController = function($scope, $http, $routeParams, $interval, $locati
     $scope.room.learners = [];
 
     // Then do it in the server too
-    const url = `/api/status/reset`;
-    const data = { room: $routeParams.room };
-    $http.post(url, data).then(function (response) {
-      $scope.room = response.data;
-      $scope.failedToClear = false;
-    }, function (error) {
-      console.log(error);
-      $scope.failedToClear = true;
-    });
+    const roomCode = $routeParams.room;
+    socket.emit('reset', roomCode);
   }
-
-  $scope.refresh = refresh;
 
   $window.document.title = "Tutor - " + $scope.room.room;
 
-  let timer = $interval(refresh, 1000);
+  // Register as a tutor
+  socket.emit('join-as-tutor', $routeParams.room);
+
+  socket.on('refresh-tutor', function(data) {
+    $scope.$applyAsync(function() {
+      $scope.room = data;
+    });
+  });
 
   $scope.$on('$destroy', function() {
-    if (timer) {
-      $interval.cancel(timer);
-      timer = undefined;
-    }
+    socket.off('refresh-tutor');
   });
 };
 
