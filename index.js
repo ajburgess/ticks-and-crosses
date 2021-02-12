@@ -6,8 +6,8 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 app.use(express.json());
 
-const activeTimeoutInMinutes = 30;      // 30 minutes
-const removalTimeoutInMinutes = 60 * 8; // 8 hours
+const activeTimeoutInMinutes = 3;  // If no comms from learner for this long, grey them out
+const removalTimeoutInMinutes = 5; // If no comms from learner for this long, delete them
 
 const db = {};
 
@@ -50,20 +50,37 @@ function compareLearners(a, b) {
 app.use('/', express.static('public'));
 app.use('*', express.static('public', { index: 'index.html' }));
 
-function refreshTutor(roomCode) {
-  const room = getRoom(roomCode);
-  const beep = room.beep;
-  delete room.beep;
-  tidyRoom(room);
-  const data = {
-    room: room.code,
-    beep: beep,
-    learners: Object.values(room.learners).filter(l => l.name).sort(compareLearners)
-  };
-  io.to(`tutor-${roomCode}`).emit('refresh-tutor', data);
-}
-
 io.on('connection', function(socket) {
+  function associateSocketWithTutorRoom(roomCode) {
+    socket.rooms.forEach(r => {
+      socket.leave(r);
+    });
+    socket.join(`tutor-${roomCode.toUpperCase()}`);
+  }
+
+  function associateSocketWithLearnerRoom(roomCode) {
+    socket.rooms.forEach(r => {
+      socket.leave(r);
+    });
+    socket.join(roomCode.toUpperCase());    
+  }
+
+  function refreshTutor(roomCode) {
+    const room = getRoom(roomCode);
+    const beep = room.beep;
+    delete room.beep;
+    tidyRoom(room);
+    const data = {
+      room: room.code,
+      beep: beep,
+      learners: Object.values(room.learners).filter(l => l.name).sort(compareLearners)
+    };
+    io.to(`tutor-${roomCode}`).emit('refresh-tutor', data);
+    if (data.beep) {
+      console.log(`beep: ${roomCode}`);
+    }
+  }
+  
   function refreshLearner(roomCode, client) {
     const room = getRoom(roomCode);
     const learner = room.learners[client] || {};
@@ -78,24 +95,26 @@ io.on('connection', function(socket) {
 
   socket.on('join-as-learner', (roomCode, client) => {
     console.log(`join-as-learner: ${roomCode} - ${client}`);
-    socket.rooms.forEach(r => {
-      socket.leave(r);
-    });
-    socket.join(roomCode);
+    associateSocketWithLearnerRoom(roomCode);
     refreshLearner(roomCode, client);
+    refreshTutor(roomCode);
   })
 
   socket.on('join-as-tutor', (roomCode) => {
     console.log(`join-as-tutor: ${roomCode}`);
-    socket.rooms.forEach(r => {
-      socket.leave(r);
-    });
-    socket.join(`tutor-${roomCode}`);
+    associateSocketWithTutorRoom(roomCode);
+    refreshTutor(roomCode);
+  })
+
+  socket.on('ping-from-tutor', (roomCode) => {
+    console.log(`ping-from-tutor: ${roomCode}`);
+    associateSocketWithTutorRoom(roomCode);
     refreshTutor(roomCode);
   })
 
   socket.on('clear', (roomCode) => {
     console.log(`clear: ${roomCode}`);
+    associateSocketWithTutorRoom(roomCode);
     const room = getRoom(roomCode);
     for (const client in room.learners) {
       const learner = room.learners[client];
@@ -103,7 +122,7 @@ io.on('connection', function(socket) {
       learner.handUpRank = undefined;
     }
     saveRoom(room);
-    io.to(roomCode).emit('clear'); // SOCKETS
+    io.to(roomCode).emit('clear');
     refreshTutor(roomCode);
   })
 
@@ -111,29 +130,58 @@ io.on('connection', function(socket) {
     try {
       console.log(`status: ${JSON.stringify(data)}`);
       const { client, name, status } = data;
-      const room = getRoom(data.room);
+      const roomCode = data.room;
+      associateSocketWithLearnerRoom(roomCode);
+      const room = getRoom(roomCode);
       const learner = room.learners[client] || {};
       if (name != undefined) {
         learner.name = name;
       }
-      learner.handUpRank = undefined;
       if (status != undefined) {
+        const oldStatus = learner.status;
         learner.status = status;
         if (learner.status == 'hand-up') {
-          const existingRanks = Object.values(room.learners).map(lnr => lnr.handUpRank || 0);
-          if (existingRanks.length == 0) {
-            learner.handUpRank = 1;
-          } else {
-            const maxExistingRank = Math.max(...existingRanks);
-            learner.handUpRank = maxExistingRank + 1;
+          if (learner.status != oldStatus) {
+            // If hand was already up, just leave everything alone
+            // Else for new hand up, decide the rank number to show next to it
+            const existingRanks = Object.values(room.learners).map(lnr => lnr.handUpRank || 0);
+            if (existingRanks.length == 0) {
+              learner.handUpRank = 1;
+            } else {
+              const maxExistingRank = Math.max(...existingRanks);
+              learner.handUpRank = maxExistingRank + 1;
+            }
+            room.beep = true;
           }
-          room.beep = true;
+        } else {
+          learner.handUpRank = undefined;
         }
       }
       learner.lastCommunication = new Date();
       room.learners[client] = learner;
       saveRoom(room);
-      refreshTutor(room.code);
+      refreshTutor(roomCode);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
+  socket.on('ping-from-learner', (data) => {
+    try {
+      console.log(`ping-from-learner: ${JSON.stringify(data)}`);
+      const { client, name, status } = data;
+      const roomCode = data.room;
+      associateSocketWithLearnerRoom(roomCode);
+      const room = getRoom(roomCode);
+      const learner = room.learners[client] || {};
+      if (name != undefined) {
+        learner.name = name;
+      }
+      learner.lastCommunication = new Date();
+      room.learners[client] = learner;
+      saveRoom(room);
+      refreshTutor(roomCode);
+      refreshLearner(roomCode, client);
     } catch (error) {
       console.log(error);
     }

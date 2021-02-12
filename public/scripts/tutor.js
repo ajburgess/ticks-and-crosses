@@ -1,6 +1,6 @@
-const tutorController = function($scope, $http, $routeParams, $interval, $location, $window) {
+const tutorController = function($scope, $http, $routeParams, $interval, $location, $window, $document) {
   
-  const pageRefreshInterval = 10 * 60 * 1000; // 10 minutes (in milliseconds)
+  const pingIntervalInMilliseconds = 15 * 1000; // 15 seconds
 
   $scope.room = {
     room: $routeParams.room.toUpperCase(),
@@ -49,20 +49,32 @@ const tutorController = function($scope, $http, $routeParams, $interval, $locati
   socket.on('refresh-tutor', function(data) {
     $scope.$applyAsync(function() {
       $scope.room = data;
+      if (data.beep) {
+        const beep = new Audio("/sounds/beep.wav");
+        beep.play();
+      }
     });
   });
 
-  function forcePageRefresh() {
-    $window.location.reload(true);
+  function sendPing() {
+    socket.emit("ping-from-tutor", $routeParams.room)
   }
 
-  let timer = $interval(forcePageRefresh, pageRefreshInterval);
+  let pingTimer = $interval(sendPing, pingIntervalInMilliseconds);
+
+  // When user comes back to this page in browser, send in case connection lost in meantime
+  $document[0].addEventListener('visibilitychange', function() {
+    if (!$document[0].hidden) {
+      sendPing();
+    }
+  })
 
   $scope.$on('$destroy', function() {
     socket.off('refresh-tutor');
-    if (timer) {
-      $interval.cancel(timer);
-      timer = undefined;
+    $document[0].removeEventListener('visibilitychange');
+    if (pingTimer) {
+      $interval.cancel(pingTimer);
+      pingTimer = undefined;
     }
   });
 };

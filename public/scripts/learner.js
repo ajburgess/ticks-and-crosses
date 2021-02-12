@@ -1,7 +1,6 @@
-const learnerController = function($scope, $http, $routeParams, $localStorage, $sessionStorage, $interval, $timeout, $window) {
+const learnerController = function($scope, $http, $routeParams, $localStorage, $sessionStorage, $interval, $timeout, $window, $document) {
 
-  const pageRefreshInterval = 10 * 60 * 1000; // 10 minutes (in milliseconds)
-  let nameHasChanged = false;
+  const pingIntervalInMilliseconds = 1 * 60 * 1000; // 1 minute
 
   function uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -29,17 +28,16 @@ const learnerController = function($scope, $http, $routeParams, $localStorage, $
       status: $scope.learner.status,
       name: $scope.learner.name
     };
-    socket.emit('status', data); // SOCKETS
+    socket.emit('status', data);
   }
 
   function submitName() {
-    nameHasChanged = false;
     const data = {
       client: getClient(),
       room: $routeParams.room,
       name: $scope.learner.name
     };
-    socket.emit('status', data); // SOCKETS
+    socket.emit('status', data);
   }
 
   $scope.send = function(status) {
@@ -82,27 +80,40 @@ const learnerController = function($scope, $http, $routeParams, $localStorage, $
       $scope.room.code = data.room;
       $scope.learner.name = data.name || $scope.learner.name || "";
       $scope.learner.status = data.status || "";
-      submitName();
+      //submitName();
       setTitle();
     });
   });
 
-  function forcePageRefresh() {
-    $window.location.reload(true);
+  function sendPing() {
+    const data = {
+      client: getClient(),
+      room: $routeParams.room,
+      name: $scope.learner.name
+    };
+    socket.emit('ping-from-learner', data);
   }
 
-  let timer = $interval(forcePageRefresh, pageRefreshInterval);
+  let pingTimer = $interval(sendPing, pingIntervalInMilliseconds);
+
+  // When user comes back to this page in browser, send in case connection lost in meantime
+  $document[0].addEventListener('visibilitychange', function() {
+    if (!$document[0].hidden) {
+      sendPing();
+    }
+  })
 
   $scope.$on('$destroy', function() {
     socket.off('refresh-learner');
     socket.off('clear');
+    $document[0].removeEventListener('visibilitychange');
     if (delay) {
       $timeout.cancel(delay);
       delay = undefined;
     }
-    if (timer) {
-      $interval.cancel(timer);
-      timer = undefined;
+    if (pingTimer) {
+      $interval.cancel(pingTimer);
+      pingTimer = undefined;
     }
   });
 

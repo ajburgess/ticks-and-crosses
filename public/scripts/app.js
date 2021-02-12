@@ -4,4 +4,4 @@ app.config(function ($locationProvider) {
   $locationProvider.html5Mode(true);
 });
 
-const socket = io.connect(); // SOCKETS
+const socket = io.connect();

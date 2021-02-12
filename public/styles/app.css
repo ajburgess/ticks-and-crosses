@@ -18,6 +18,11 @@ button {
   line-height: 1.75;
 }
 
+button.clipboard {
+  width: fit-content;
+  line-height: initial;
+}
+
 button:focus, input:focus {
   outline: 0;
 }
