@@ -15,6 +15,7 @@ button {
   background-color: white;
   border-radius: 15px;
   user-select: none;
+  line-height: 1.75;
 }
 
 button:focus, input:focus {
@@ -114,6 +115,7 @@ input[type=text] {
   text-align: center;
   border: 2px solid black;
   border-radius: 15px;
+  line-height: 1.75;
 }
 
 .intro input[type=text] {

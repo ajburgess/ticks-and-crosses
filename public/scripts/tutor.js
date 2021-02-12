@@ -1,4 +1,7 @@
 const tutorController = function($scope, $http, $routeParams, $interval, $location, $window) {
+  
+  const pageRefreshInterval = 10 * 60 * 1000; // 10 minutes (in milliseconds)
+
   $scope.room = {
     room: $routeParams.room.toUpperCase(),
     learners: [],
@@ -49,8 +52,18 @@ const tutorController = function($scope, $http, $routeParams, $interval, $locati
     });
   });
 
+  function forcePageRefresh() {
+    $window.location.reload(true);
+  }
+
+  let timer = $interval(forcePageRefresh, pageRefreshInterval);
+
   $scope.$on('$destroy', function() {
     socket.off('refresh-tutor');
+    if (timer) {
+      $interval.cancel(timer);
+      timer = undefined;
+    }
   });
 };
 

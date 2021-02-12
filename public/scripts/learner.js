@@ -1,5 +1,6 @@
-const learnerController = function($scope, $http, $routeParams, $localStorage, $sessionStorage, $timeout, $window) {
+const learnerController = function($scope, $http, $routeParams, $localStorage, $sessionStorage, $interval, $timeout, $window) {
 
+  const pageRefreshInterval = 10 * 60 * 1000; // 10 minutes (in milliseconds)
   let nameHasChanged = false;
 
   function uuidv4() {
@@ -86,12 +87,22 @@ const learnerController = function($scope, $http, $routeParams, $localStorage, $
     });
   });
 
+  function forcePageRefresh() {
+    $window.location.reload(true);
+  }
+
+  let timer = $interval(forcePageRefresh, pageRefreshInterval);
+
   $scope.$on('$destroy', function() {
     socket.off('refresh-learner');
     socket.off('clear');
     if (delay) {
       $timeout.cancel(delay);
       delay = undefined;
+    }
+    if (timer) {
+      $interval.cancel(timer);
+      timer = undefined;
     }
   });
 
