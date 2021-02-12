@@ -27,10 +27,14 @@ jobs:
         npm run build --if-present
         npm run test --if-present
 
+    - name: copy package.json etc into dist folder
+      run: |
+        cp package*.json dist
+
     - name: 'Deploy to Azure Web App'
       uses: azure/webapps-deploy@v2
       with:
         app-name: 'qa-ticks-and-crosses'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_b31a6a67c26546a6b139316a70383c1b }}
-        package: .
+        package: dist
