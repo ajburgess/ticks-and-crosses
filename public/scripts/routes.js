@@ -1,5 +1,8 @@
 app.config(function($routeProvider) {
   $routeProvider
+  .when("/about", {
+    templateUrl : "pages/about.html"
+  })
   .when("/settings", {
     templateUrl : "pages/settings.html",
     controller: "settings"

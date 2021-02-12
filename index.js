@@ -11,6 +11,9 @@ const removalTimeoutInMinutes = 5; // If no comms from learner for this long, de
 
 const db = {};
 
+app.use('/', express.static('public'));
+app.use('*', express.static('public', { index: 'index.html' }));
+
 function getRoom(code) {
   code = code.toUpperCase();
   return db[code] || {
@@ -46,9 +49,6 @@ function compareLearners(a, b) {
     return 0;
   }
 }
-
-app.use('/', express.static('public'));
-app.use('*', express.static('public', { index: 'index.html' }));
 
 io.on('connection', function(socket) {
   function associateSocketWithTutorRoom(roomCode) {
