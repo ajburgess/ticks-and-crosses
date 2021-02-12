@@ -6,7 +6,8 @@
   "scripts": {
     "build": "gulp build",
     "watch:src": "nodemon --watch src --exec gulp build",
-    "dev": "npm run watch:src & nodemon dist/index.js"
+    "dev": "npm run watch:src & (cd dist && nodemon dist/index.js)",
+    "start": "node index.js"
   },
   "author": "Andrew Burgess, QA Apprenticeships",
   "license": "ISC",
