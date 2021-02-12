@@ -4,8 +4,8 @@
   "description": "Provides the missing features from WebEx Meetings",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
   },
   "author": "Andrew Burgess, QA Apprenticeships",
   "license": "ISC",
@@ -14,6 +14,7 @@
     "socket.io": "^3.1.1"
   },
   "devDependencies": {
+    "copyfiles": "^2.4.1",
     "nodemon": "^2.0.7"
   }
 }
