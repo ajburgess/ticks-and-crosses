@@ -29,7 +29,9 @@ jobs:
 
     - name: copy deployment files into dist folder
       run: |
-        cp src package.json dist
+        mkdir dist
+        cp src dist
+        cp package.json dist
 
     - name: 'Deploy to Azure Web App'
       uses: azure/webapps-deploy@v2
