@@ -96,17 +96,19 @@ const learnerController = function($scope, $http, $routeParams, $localStorage, $
 
   let pingTimer = $interval(sendPing, pingIntervalInMilliseconds);
 
-  // When user comes back to this page in browser, send in case connection lost in meantime
-  $document[0].addEventListener('visibilitychange', function() {
+  function onVisibilityChange() {
     if (!$document[0].hidden) {
       sendPing();
     }
-  })
+  }
+
+  // When user comes back to this page in browser, send in case connection lost in meantime
+  $document[0].addEventListener('visibilitychange', onVisibilityChange);
 
   $scope.$on('$destroy', function() {
     socket.off('refresh-learner');
     socket.off('clear');
-    $document[0].removeEventListener('visibilitychange');
+    $document[0].removeEventListener('visibilitychange', onVisibilityChange);
     if (delay) {
       $timeout.cancel(delay);
       delay = undefined;

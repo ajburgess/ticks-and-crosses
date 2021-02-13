@@ -62,16 +62,18 @@ const tutorController = function($scope, $http, $routeParams, $interval, $locati
 
   let pingTimer = $interval(sendPing, pingIntervalInMilliseconds);
 
-  // When user comes back to this page in browser, send in case connection lost in meantime
-  $document[0].addEventListener('visibilitychange', function() {
+  function onVisibilityChange() {
     if (!$document[0].hidden) {
       sendPing();
     }
-  })
+  }
+
+  // When user comes back to this page in browser, send in case connection lost in meantime
+  $document[0].addEventListener('visibilitychange', onVisibilityChange);
 
   $scope.$on('$destroy', function() {
     socket.off('refresh-tutor');
-    $document[0].removeEventListener('visibilitychange');
+    $document[0].removeEventListener('visibilitychange', onVisibilityChange);
     if (pingTimer) {
       $interval.cancel(pingTimer);
       pingTimer = undefined;
