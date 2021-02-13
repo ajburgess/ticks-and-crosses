@@ -30,7 +30,7 @@ jobs:
     - name: copy deployment files into dist folder
       run: |
         mkdir dist
-        cp src dist
+        cp -r src dist
         cp package.json dist
 
     - name: 'Deploy to Azure Web App'
