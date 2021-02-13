@@ -2,12 +2,10 @@
   "name": "ticks-and-crosses",
   "version": "1.0.0",
   "description": "Provides the missing features from WebEx Meetings",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "build": "gulp build",
-    "watch:src": "nodemon --watch src --exec gulp build",
-    "dev": "npm run watch:src & (cd dist && nodemon dist/index.js)",
-    "start": "node index.js"
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
   },
   "author": "Andrew Burgess, QA Apprenticeships",
   "license": "ISC",
@@ -23,6 +21,7 @@
     "gulp-cli": "^2.3.0",
     "gulp-debug": "^4.0.0",
     "gulp-sourcemaps": "^3.0.0",
-    "nodemon": "^2.0.7"
+    "nodemon": "^2.0.7",
+    "npm-run-all": "^4.1.5"
   }
 }

@@ -1,19 +1,23 @@
 app.config(function($routeProvider) {
   $routeProvider
   .when("/about", {
-    templateUrl : "pages/about.html"
+    templateUrl : "pages/about.html",
+    caseInsensitiveMatch: true
   })
   .when("/settings", {
     templateUrl : "pages/settings.html",
-    controller: "settings"
+    controller: "settings",
+    caseInsensitiveMatch: true
   })
   .when("/:room/tutor", {
     templateUrl : "pages/tutor.html",
-    controller: "tutor-controller"
+    controller: "tutor-controller",
+    caseInsensitiveMatch: true
   })
   .when("/:room", {
     templateUrl : "pages/learner.html",
-    controller: "learner-controller"
+    controller: "learner-controller",
+    caseInsensitiveMatch: true
   })
   .otherwise({
     templateUrl : "pages/intro.html",

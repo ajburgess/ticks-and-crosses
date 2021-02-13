@@ -1,6 +1,5 @@
 const path = require('path');
 const express = require('express');
-const { nextTick } = require('process');
 const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
@@ -11,8 +10,36 @@ const removalTimeoutInMinutes = 5; // If no comms from learner for this long, de
 
 const db = {};
 
-app.use('/', express.static('public'));
-app.use('*', express.static('public', { index: 'index.html' }));
+// Special case: if ask for index.html, redirect to / (else looks like trying to joint the room 'index.html'!)
+app.get('/index.html', function (req, res) {
+  res.redirect('/');
+});
+
+// If requested static file is found, return it (no caching)
+app.use('/', express.static(path.join(__dirname, 'public'), {
+  index: false,
+  cacheControl: true,
+  maxAge: 0,
+  etag: false,
+  lastModified: false,
+  redirect: false,
+  dotfiles: "deny"
+}));
+
+// If request looks like an unfound file, i.e. contains a dot, then return 404 page not found
+app.get('*.*', function (req, res) {
+  res.sendStatus(404).end();
+});
+
+// For every other request, need to return index.html (no caching)
+app.get('*', function (req, res) {
+  res.sendFile(path.join(__dirname, 'public/index.html'), {
+    cacheControl: true,
+    maxAge: 0,
+    etag: false,
+    lastModified: false
+   });
+});
 
 function getRoom(code) {
   code = code.toUpperCase();
