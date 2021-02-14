@@ -1,5 +1,6 @@
 const path = require('path');
 const express = require('express');
+const { tree } = require('gulp');
 const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
@@ -97,10 +98,11 @@ io.on('connection', function(socket) {
     const beep = room.beep;
     delete room.beep;
     tidyRoom(room);
+    const learnersIncludingClient = Object.entries(room.learners).map(e => ({client: e[0], ...e[1]}));
     const data = {
       room: room.code,
       beep: beep,
-      learners: Object.values(room.learners).filter(l => l.name).sort(compareLearners)
+      learners: learnersIncludingClient.filter(l => l.name).sort(compareLearners)
     };
     io.to(`tutor-${roomCode}`).emit('refresh-tutor', data);
     if (data.beep) {
@@ -125,19 +127,19 @@ io.on('connection', function(socket) {
     associateSocketWithLearnerRoom(roomCode);
     refreshLearner(roomCode, client);
     refreshTutor(roomCode);
-  })
+  });
 
   socket.on('join-as-tutor', (roomCode) => {
     console.log(`join-as-tutor: ${roomCode}`);
     associateSocketWithTutorRoom(roomCode);
     refreshTutor(roomCode);
-  })
+  });
 
   socket.on('ping-from-tutor', (roomCode) => {
     console.log(`ping-from-tutor: ${roomCode}`);
     associateSocketWithTutorRoom(roomCode);
     refreshTutor(roomCode);
-  })
+  });
 
   socket.on('clear', (roomCode) => {
     console.log(`clear: ${roomCode}`);
@@ -151,7 +153,16 @@ io.on('connection', function(socket) {
     saveRoom(room);
     io.to(roomCode).emit('clear');
     refreshTutor(roomCode);
-  })
+  });
+
+  socket.on('kick-learner', (roomCode, client) => {
+    console.log(`kick-learner: ${roomCode} ${client}`);
+    associateSocketWithTutorRoom(roomCode);
+    const room = getRoom(roomCode);
+    delete room.learners[client];
+    saveRoom(room);
+    refreshTutor(roomCode);
+  });
 
   socket.on('status', (data) => {
     try {

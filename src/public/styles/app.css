@@ -6,6 +6,15 @@ h1 {
   margin: 0;
 }
 
+.tutor .learner {
+  cursor: pointer;
+  user-select: none;
+}
+
+.selected {
+  background-color: yellow;
+}
+
 button {
   cursor: pointer;
   padding: 5px;
@@ -140,7 +149,7 @@ input[type=text] {
 }
 
 .coffee {
-  color: chocolate;
+  color: grey;
 }
 
 .away {

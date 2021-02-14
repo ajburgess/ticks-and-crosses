@@ -8,7 +8,17 @@ const tutorController = function($scope, $http, $routeParams, $interval, $locati
     beep: true // Kick off ability to play hand-up beep
   };
 
+  $scope.selectedClient = null;
+
   $scope.url = new URL('/' + $scope.room.room, $location.absUrl()).href;
+
+  $scope.selectLearner = function(learner) {
+    if ($scope.selectedClient != learner.client) {
+      $scope.selectedClient = learner.client;
+    } else {
+      $scope.selectedClient = null; // select again => deselect
+    }
+  }
 
   $scope.copyUrl = function () {
     const tempInput = document.createElement("input");
@@ -27,18 +37,18 @@ const tutorController = function($scope, $http, $routeParams, $interval, $locati
       learner.handUpRank = undefined;
     });
 
+    $scope.selectedClient = null;
+
     // Then do it in the server too
     const roomCode = $routeParams.room;
     socket.emit('clear', roomCode);
   }
 
-  $scope.resetRoom = function () {
-    // Reset room in browser first
-    $scope.room.learners = [];
-
-    // Then do it in the server too
-    const roomCode = $routeParams.room;
-    socket.emit('reset', roomCode);
+  $scope.kickSelectedLearner = function() {
+    if ($scope.selectedClient) {
+      socket.emit('kick-learner', $routeParams.room, $scope.selectedClient);
+      $scope.selectedClient = null;
+    }
   }
 
   $window.document.title = "Tutor - " + $scope.room.room;

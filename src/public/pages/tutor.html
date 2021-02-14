@@ -14,7 +14,7 @@
     <div class="section" ng-if="room.learners.length > 0">
       <div class="row2">
         <table>
-          <tr ng-repeat="learner in room.learners" ng-class="learner.isActive ? 'active' : 'inactive'">
+          <tr class="learner" ng-repeat="learner in room.learners" ng-click="selectLearner(learner)" ng-class="{active: learner.isActive, inactive: !learner.isActive, selected: learner.client == selectedClient}">
             <td>
               <span>{{learner.name}}</span>
             </td>
@@ -32,12 +32,11 @@
     </div>
     <div class="section" ng-if="room.learners.length > 0">
       <div class="row">
-        <button class="button1" ng-click="clearStatus()">Clear status</button>
+        <button class="button1" ng-click="clearStatus()">Clear all status flags</button>
       </div>
-    </div>
-    <div class="row">
-      <div class="failed" ng-if="failedToClear">Failed to clear - try again</div>
-      <div class="failed" ng-if="!failedToClear && failedToRefresh">Failed to refresh</div>
+      <div class="row" ng-if="selectedClient">
+        <button class="button2" ng-click="kickSelectedLearner()">Kick selected learner</button>
+      </div>
     </div>
   </div>
 </div>
