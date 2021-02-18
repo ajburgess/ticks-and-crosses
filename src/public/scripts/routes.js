@@ -9,6 +9,11 @@ app.config(function($routeProvider) {
     controller: "settings",
     caseInsensitiveMatch: true
   })
+  .when("/browser-check", {
+    templateUrl : "pages/browser-check.html",
+    controller: "browser-check",
+    caseInsensitiveMatch: true
+  })
   .when("/:room/tutor", {
     templateUrl : "pages/tutor.html",
     controller: "tutor-controller",
