@@ -93,6 +93,7 @@ io.on('connection', function(socket) {
   }
 
   function refreshTutor(roomCode) {
+    roomCode = roomCode.toUpperCase();
     const room = getRoom(roomCode);
     const beep = room.beep;
     delete room.beep;
@@ -159,6 +160,15 @@ io.on('connection', function(socket) {
     associateSocketWithTutorRoom(roomCode);
     const room = getRoom(roomCode);
     delete room.learners[client];
+    saveRoom(room);
+    refreshTutor(roomCode);
+  });
+
+  socket.on('kick-all-learners', (roomCode) => {
+    console.log(`kick-all-learners: ${roomCode}`);
+    associateSocketWithTutorRoom(roomCode);
+    const room = getRoom(roomCode);
+    room.learners = { };
     saveRoom(room);
     refreshTutor(roomCode);
   });

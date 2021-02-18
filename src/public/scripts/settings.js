@@ -3,5 +3,7 @@ app.controller('settings', function ($scope, $localStorage) {
   $scope.settings = $localStorage;
   
   // Set defaults for all settings
-  $scope.settings.useSession ||= false;
+  if ($scope.settings.useSession == undefined) {
+    $scope.settings.useSession = false;
+  }
 });

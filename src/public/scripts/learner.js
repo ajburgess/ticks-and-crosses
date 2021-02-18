@@ -75,7 +75,7 @@ const learnerController = function($scope, $http, $routeParams, $localStorage, $
     });
   });
 
-  socket.on('refresh-learner', (data) => {
+  socket.on('refresh-learner', function (data) {
     $scope.$applyAsync(function() {
       $scope.room.code = data.room;
       $scope.learner.name = data.name || $scope.learner.name || "";

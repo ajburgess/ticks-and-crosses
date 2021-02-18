@@ -6,36 +6,69 @@
       </div>
       <div class="row2 url">
         <span class="url">{{url}}</span>
+        <span class="col-gap"></span>
         <button ng-click="copyUrl()" title="Copy to clipboard" class="clipboard">
           <i class="fas fa-clipboard"></i>
         </button>
       </div>
     </div>
     <div class="section" ng-if="room.learners.length > 0">
+      <div class="section-gap"></div>
       <div class="row2">
         <table>
-          <tr class="learner" ng-repeat="learner in room.learners" ng-click="selectLearner(learner)" ng-class="{active: learner.isActive, inactive: !learner.isActive, selected: learner.client == selectedClient}">
-            <td>
-              <span>{{learner.name}}</span>
-            </td>
-            <td class="status">
-              <span ng-if="learner.handUpRank > 0">{{learner.handUpRank}}</span>
-              <status-symbol status="learner.status" />
-            </td>
-           </tr>
+          <thead>
+            <tr>
+              <td>
+                Total learners
+              </td>
+              <td style="text-align: right;">
+                {{ room.learners.length }}
+              </td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="learner" ng-repeat="learner in room.learners" ng-click="selectLearner(learner)" ng-class="{active: learner.isActive, inactive: !learner.isActive, selected: learner.client == selectedClient}" ng-if="learner.status || !settings.hideLeanersWithNoStatus">
+              <td>
+                <span>{{learner.name}}</span>
+              </td>
+              <td class="status">
+                <span ng-if="learner.handUpRank > 0">{{learner.handUpRank}}</span>
+                <status-symbol status="learner.status" />
+              </td>
+             </tr>  
+          </tbody>
+          <tfoot>            
+          </tfoot>
         </table>
       </div>
     </div>
     <div class="section" ng-if="room.learners.length == 0">
+      <div class="section-gap"></div>
       <div class="row">No learners have joined the room yet.</div>
+      <div class="row-gap"></div>
       <div class="row">Send them the URL above.</div>
     </div>
     <div class="section" ng-if="room.learners.length > 0">
+      <div class="section-gap"></div>
       <div class="row">
         <button class="button1" ng-click="clearStatus()">Clear all status flags</button>
       </div>
-      <div class="row" ng-if="selectedClient">
-        <button class="button2" ng-click="kickSelectedLearner()">Kick selected learner</button>
+      <div class="row-gap"></div>
+      <div class="row">
+        <button class="button2" ng-click="kickAllLearners()">Kick out all learners</button>
+      </div>
+      <!-- <div ng-if="selectedClient">
+        <div class="row-gap"></div>
+        <div class="row" >
+          <button class="button2" ng-click="kickSelectedLearner()">Kick selected learner</button>
+        </div>  
+      </div> -->
+      <div class="row-gap"></div>
+      <div class="row">
+        <div>
+          <input id="hide" type="checkbox" ng-model="settings.hideLeanersWithNoStatus">
+          <label for="hide">Hide learners with no status</label>
+        </div>
       </div>
     </div>
   </div>

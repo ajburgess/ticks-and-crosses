@@ -6,22 +6,27 @@
           <h1>Ticks and Crosses</h1>
         </div>
       </div>
+      <div class="section-gap"></div>
       <div class="section">
         <div class="row">
           <input type="text" placeholder="Room" ng-model="room.code" autocomplete="off" style="text-transform:uppercase" minlength="2" maxlength="8" onkeypress="return /[A-Z|0-9]/i.test(event.key)" required>
         </div>
       </div>
+      <div class="section-gap"></div>
       <div class="section">
         <div class="row">
           <button type="submit" ng-click="form.$valid && learner()" class="button1">I'm a learner</button>
+          <span class="col-gap"></span>
           <button type="submit" ng-click="form.$valid && tutor()" class="button2">I'm the tutor</button>
         </div>
       </div>
+      <div class="section-gap"></div>
       <div class="section">
         <div class="row3">
           <div>Tutor - make up a unique room code for your class</div>
         </div>
       </div>
+      <div class="section-gap"></div>
       <div class="section">
         <div class="row">
           <a ng-href="./about">About this app</a>

@@ -9,8 +9,14 @@ const tutorController = function($scope, $http, $routeParams, $interval, $locati
   };
 
   $scope.selectedClient = null;
+  $scope.settings = {
+    hideLearnersWithNoStatus: false
+  };
 
-  $scope.url = new URL('/' + $scope.room.room, $location.absUrl()).href;
+  const absUrl = $location.absUrl();
+  const url = new URL('/' + $scope.room.room, absUrl);
+
+  $scope.url = url.href;
 
   $scope.selectLearner = function(learner) {
     if ($scope.selectedClient != learner.client) {
@@ -32,10 +38,11 @@ const tutorController = function($scope, $http, $routeParams, $interval, $locati
 
   $scope.clearStatus = function () {
     // Clear status in browser first
-    $scope.room.learners.forEach(learner => {
+    for (let i = 0; i < $scope.room.learners.length; i++) {
+      const learner = $scope.room.learners[i];
       learner.status = "";
       learner.handUpRank = undefined;
-    });
+    }
 
     $scope.selectedClient = null;
 
@@ -49,6 +56,11 @@ const tutorController = function($scope, $http, $routeParams, $interval, $locati
       socket.emit('kick-learner', $routeParams.room, $scope.selectedClient);
       $scope.selectedClient = null;
     }
+  }
+
+  $scope.kickAllLearners = function() {
+    socket.emit('kick-all-learners', $routeParams.room);
+    $scope.selectedClient = null;
   }
 
   $window.document.title = "Tutor - " + $scope.room.room;
