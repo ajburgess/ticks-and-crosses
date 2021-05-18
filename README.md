@@ -20,4 +20,4 @@ a browser tab connecting to the application multiple times.
 
 [screenshot]: https://github.com/ajburgess/ticks-and-crosses/raw/main/screenshot.png
 
-This is a text message.
+This is a TEST message.
