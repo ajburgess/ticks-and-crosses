@@ -27,7 +27,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr class="learner" ng-repeat="learner in room.learners" ng-click="selectLearner(learner)" ng-class="{active: learner.isActive, inactive: !learner.isActive, selected: learner.client == selectedClient}" ng-if="learner.status || !settings.hideLeanersWithNoStatus">
+            <tr class="learner" ng-repeat="learner in room.learners" ng-click="selectLearner(learner)" ng-class="{active: learner.isActive, inactive: !learner.isActive, selected: selectedClients.includes(learner.client)}" ng-if="learner.status || !settings.hideLeanersWithNoStatus">
               <td>
                 <span>{{learner.name}}</span>
               </td>
@@ -57,10 +57,10 @@
       <div class="row">
         <button class="button2" ng-click="kickAllLearners()">Kick out all learners</button>
       </div>
-      <!-- <div ng-if="selectedClient">
+      <!-- <div ng-if="selectedClients.length > 0">
         <div class="row-gap"></div>
         <div class="row" >
-          <button class="button2" ng-click="kickSelectedLearner()">Kick selected learner</button>
+          <button class="button2" ng-click="kickSelectedLearners()">Kick selected learner(s)</button>
         </div>  
       </div> -->
       <div class="row-gap"></div>

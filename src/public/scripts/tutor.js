@@ -8,7 +8,8 @@ const tutorController = function($scope, $http, $routeParams, $interval, $locati
     beep: true // Kick off ability to play hand-up beep
   };
 
-  $scope.selectedClient = null;
+  $scope.selectedClients = [];
+  
   $scope.settings = {
     hideLearnersWithNoStatus: false
   };
@@ -19,10 +20,14 @@ const tutorController = function($scope, $http, $routeParams, $interval, $locati
   $scope.url = url.href;
 
   $scope.selectLearner = function(learner) {
-    if ($scope.selectedClient != learner.client) {
-      $scope.selectedClient = learner.client;
+    if (!$scope.selectedClients.includes(learner.client)) {
+      // Not currently selected, so add learner to liust of selected ones
+      $scope.selectedClients.push(learner.client);
     } else {
-      $scope.selectedClient = null; // select again => deselect
+      // Selected, so remove from the list
+      $scope.selectedClients = $scope.selectedClients.filter(function (client) {
+        return client != learner.client;
+      });
     }
   }
 
@@ -44,23 +49,23 @@ const tutorController = function($scope, $http, $routeParams, $interval, $locati
       learner.handUpRank = undefined;
     }
 
-    $scope.selectedClient = null;
+    $scope.selectedClients = [];
 
     // Then do it in the server too
     const roomCode = $routeParams.room;
     socket.emit('clear', roomCode);
   }
 
-  $scope.kickSelectedLearner = function() {
-    if ($scope.selectedClient) {
-      socket.emit('kick-learner', $routeParams.room, $scope.selectedClient);
-      $scope.selectedClient = null;
+  $scope.kickSelectedLearners = function() {
+    for (i = 0; i < $scope.selectedClients.length; i++) {
+      socket.emit('kick-learner', $routeParams.room, $scope.selectedClients[i]);
     }
+    $scope.selectedClients = [];
   }
 
   $scope.kickAllLearners = function() {
     socket.emit('kick-all-learners', $routeParams.room);
-    $scope.selectedClient = null;
+    $scope.selectedClients = [];
   }
 
   $window.document.title = "Tutor - " + $scope.room.room;
